@@ -1,0 +1,15 @@
+component: koa
+name: koaDemo
+app: koa-starter
+inputs:
+  src:
+    src: ./
+    exclude:
+      - .env
+  region: ap-guangzhou
+  runtime: Nodejs10.15
+  apigatewayConf:
+    protocols:
+      - http
+      - https
+    environment: release
