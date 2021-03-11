@@ -1,17 +1,48 @@
+require('dotenv').config()
+
 const Koa = require('koa')
-const KoaRouter = require('koa-router')
-const sendFile = require('koa-sendfile')
-const path = require('path')
-
 const app = new Koa()
-const router = new KoaRouter()
+const json = require('koa-json')
+const onerror = require('koa-onerror')
+const bodyparser = require('koa-bodyparser')
+const logger = require('koa-logger')
+const cors = require('koa2-cors')
 
-// Routes
-router.get(`/*`, async (ctx) => {
-  await sendFile(ctx, path.join(__dirname, 'index.html'))
+const accessToken = require('./middlewares/accessToken')
+
+const index = require('./routes/index')
+const api = require('./routes/api')
+
+// 错误处理
+onerror(app)
+
+// 中间件
+app.use(cors())
+app.use(bodyparser({
+  enableTypes:['json', 'form', 'text']
+}))
+app.use(json())
+app.use(logger())
+app.use(require('koa-static')(__dirname + '/public'))
+
+// 日志
+app.use(async (ctx, next) => {
+  const start = new Date()
+  await next()
+  const ms = new Date() - start
+  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
 
-app.use(router.allowedMethods()).use(router.routes());
+// 使用绑定 accessToken 的中间件
+app.use(accessToken())
 
-// don't forget to export!
+// 路由
+app.use(index.routes(), index.allowedMethods())
+app.use(api.routes(), api.allowedMethods())
+
+// 错误处理
+app.on('error', (err) => {
+  console.error('server error', err)
+});
+
 module.exports = app
