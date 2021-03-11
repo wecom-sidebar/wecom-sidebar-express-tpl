@@ -41,9 +41,9 @@ const fetchAccessToken = async () => {
 
 module.exports = () => {
   return async (ctx, next) => {
-    accessToken = getAccessTokenFromCache()
+    accessToken = getAccessTokenFromCache() || (await fetchAccessToken())
 
-    ctx.accessToken = accessToken || (await fetchAccessToken())
+    ctx.accessToken = accessToken
 
     await next()
   }
