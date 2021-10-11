@@ -3,7 +3,7 @@ const router = require('koa-router')()
 const {sign} = require('../controllers/QywxUtilsController');
 const QywxBaseController = require('../controllers/QywxProxyController');
 
-const prefix = '/qywx-utils/';
+const prefix = '/api/qywx-utils/';
 
 router.prefix(prefix)
 
