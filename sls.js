@@ -10,7 +10,7 @@ const cors = require('koa2-cors')
 
 const accessToken = require('./middlewares/accessToken')
 
-const api = require('./routes/api')
+const qywx = require('./routes/qywx')
 
 // 错误处理
 onerror(app)
@@ -36,7 +36,7 @@ app.use(async (ctx, next) => {
 app.use(accessToken())
 
 // 路由
-app.use(api.routes(), api.allowedMethods())
+app.use(qywx.routes(), qywx.allowedMethods())
 
 // 错误处理
 app.on('error', (err) => {
