@@ -1,38 +1,47 @@
 const router = require('koa-router')()
 
-const {getAppSignature} = require('../controllers/QywxUtilsController');
+const {sign} = require('../controllers/QywxUtilsController');
 const QywxBaseController = require('../controllers/QywxProxyController');
 
 const prefix = '/qywx-utils/';
 
 router.prefix(prefix)
 
-router.get('/app-signature', async (ctx) => {
-  console.log('search', ctx.request.search)
-  console.log('query', ctx.request.query)
+const nonceStr = Buffer.from(new Date().toISOString()).toString('base64')
+const timestamp = Date.now();
+
+// 获取应用签名，agentConfig 需要的 sign 字段
+router.get('/signatures', async (ctx) => {
   const {url} = ctx.request.query;
 
   const parsedUrl = decodeURIComponent(url);
 
-  const ticketRes = await QywxBaseController.getRequest(
-    '/ticket/get',
-    { type: 'agent_config'},
-    ctx.accessToken
-  )
+  // 获取企业 jsapi_ticket 和应用 jsapi_ticket
+  const [corpTicketRes, appTicketRes] = await Promise.all([
+    QywxBaseController.getRequest('/get_jsapi_ticket', {}, ctx.accessToken),
+    QywxBaseController.getRequest('/ticket/get', { type: 'agent_config'}, ctx.accessToken)
+  ])
 
-  const {signature, timestamp, nonceStr} = getAppSignature(ticketRes.ticket, parsedUrl)
+  // 生成签名
+  const corpSignature = sign(corpTicketRes.ticket, nonceStr, timestamp, parsedUrl)
+  const appSignature = sign(appTicketRes.ticket, nonceStr, timestamp, parsedUrl)
 
   ctx.body = {
-    signature: {
-      signature,
-      timestamp,
+    meta: {
       nonceStr,
+      timestamp,
       url: parsedUrl,
     },
-    ticket: {
-      ticket: ticketRes.ticket,
-      expires: ticketRes.expires,
-    }
+    app: {
+      ticket: appTicketRes.ticket,
+      expires: appTicketRes.expires,
+      signature: appSignature,
+    },
+    corp: {
+      ticket: corpTicketRes.ticket,
+      expires: corpTicketRes.expires,
+      signature: corpSignature,
+    },
   }
 })
 
