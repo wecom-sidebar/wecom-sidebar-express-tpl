@@ -13,7 +13,7 @@ const getAccessTokenFromCache = () => {
     }
 
     // 判读是否过期
-    return Date.now() - expiration <= 0 ? null : accessToken
+    return expiration - Date.now() <= 0 ? null : accessToken
   } catch (e) {
     console.error(e)
     return null
