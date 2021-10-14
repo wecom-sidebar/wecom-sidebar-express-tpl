@@ -1,24 +1,8 @@
 const proxy = require('../proxy')
-
-let accessToken = null
-let expiration = null
+const redis = require("../redis");
+const keys = require("../constants/keys");
 
 const OFFSET = 100;
-
-const getAccessTokenFromCache = () => {
-  try {
-    // 是否已经存在
-    if (!accessToken || !expiration) {
-      return null
-    }
-
-    // 判读是否过期
-    return expiration - Date.now() <= 0 ? null : accessToken
-  } catch (e) {
-    console.error(e)
-    return null
-  }
-}
 
 const fetchAccessToken = async () => {
   const response = await proxy.get('/gettoken', {
@@ -28,20 +12,21 @@ const fetchAccessToken = async () => {
     },
   })
 
-  accessToken = response.data.access_token
+  const { access_token, expires_in } = response.data;
 
-  expiration = Date.now() + response.data.expires_in - OFFSET
+  // 存入 redis
+  await redis.set(keys.ACCESS_TOKEN, access_token, 'ex', expires_in - OFFSET);
 
-  console.log('获取 access_token: ' + accessToken)
+  console.log('获取 access_token: ' + access_token)
 
-  return accessToken
+  return access_token
 }
 
 module.exports = () => {
   return async (ctx, next) => {
-    accessToken = getAccessTokenFromCache() || (await fetchAccessToken())
+    const cacheAccessToken = await redis.get(keys.ACCESS_TOKEN);
 
-    ctx.accessToken = accessToken
+    ctx.accessToken = cacheAccessToken || (await fetchAccessToken())
 
     await next()
   }
