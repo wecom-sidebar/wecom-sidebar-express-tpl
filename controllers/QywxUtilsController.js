@@ -3,7 +3,6 @@ const keys = require("../constants/keys");
 const redis = require("../redis");
 const QywxBaseController = require("../controllers/QywxProxyController");
 
-// 缓存的 jsapi ticket
 const OFFSET = 100;
 
 // 生成签名，具体可参考：https://work.weixin.qq.com/api/doc/90001/90144/90539
