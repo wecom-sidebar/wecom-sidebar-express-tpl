@@ -17,7 +17,9 @@ router.get('/signatures', async (ctx) => {
   const [parsedUrl] = decodeURIComponent(url).split('#');
 
   // 获取 js api ticket（包含 corp 和 app）
-  const {corpTicket, appTicket} = QywxUtilsController.getJsApiTickets(parsedUrl, ctx.accessToken);
+  const {corpTicket, appTicket} = await QywxUtilsController.getJsApiTickets(parsedUrl, ctx.accessToken);
+
+  console.log('获取 ticket', corpTicket, appTicket);
 
   // 生成签名
   const corpSignature = sign(corpTicket, nonceStr, timestamp, parsedUrl)
