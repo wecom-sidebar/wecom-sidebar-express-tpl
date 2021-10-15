@@ -18,9 +18,11 @@ const sign = (ticket, nonceStr, timestamp, fullUrl) => {
 }
 
 const getJsApiTickets = async (url, accessToken) => {
+  const [urlKey] = url.split('#')
+
   // 使用前缀和 url 生成当前的 key
-  const corpJsApiTicketsKey = `${keys.CORP_JSAPI_TICKET}_${url}`;
-  const appJsApiTicketsKey = `${keys.APP_JSAPI_TICKET}_${url}`;
+  const corpJsApiTicketsKey = `${keys.CORP_JSAPI_TICKET}_${urlKey}`;
+  const appJsApiTicketsKey = `${keys.APP_JSAPI_TICKET}_${urlKey}`;
 
   // 缓存 ticket
   const cacheCorpJsApiTickets = await redis.get(corpJsApiTicketsKey);
@@ -28,6 +30,7 @@ const getJsApiTickets = async (url, accessToken) => {
 
   // 是否有缓存的 tickets
   if (cacheAppJsApiTicket || cacheCorpJsApiTickets) {
+    console.log('使用 redis 的 ticket', cacheCorpJsApiTickets, cacheAppJsApiTicket)
     return {
       corpTicket: cacheCorpJsApiTickets,
       appTicket: cacheAppJsApiTicket
@@ -35,6 +38,7 @@ const getJsApiTickets = async (url, accessToken) => {
   }
 
   // 获取企业 jsapi_ticket 和应用 jsapi_ticket
+  console.log('远程获取 ticket', cacheCorpJsApiTickets, cacheAppJsApiTicket)
   const [corpTicketRes, appTicketRes] = await Promise.all([
     QywxBaseController.getRequest('/get_jsapi_ticket', {}, accessToken),
     QywxBaseController.getRequest('/ticket/get', { type: 'agent_config'}, accessToken)

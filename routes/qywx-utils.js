@@ -14,7 +14,7 @@ const timestamp = Date.now();
 router.get('/signatures', async (ctx) => {
   const {url} = ctx.request.query;
 
-  const parsedUrl = decodeURIComponent(url);
+  const [parsedUrl] = decodeURIComponent(url).split('#');
 
   // 获取 js api ticket（包含 corp 和 app）
   const {corpTicket, appTicket} = QywxUtilsController.getJsApiTickets(parsedUrl, ctx.accessToken);
