@@ -12,6 +12,8 @@ const fetchAccessToken = async () => {
     },
   })
 
+  console.log('fetchAccessToken response', response.data);
+
   const { access_token, expires_in } = response.data;
 
   // 存入 redis
@@ -25,6 +27,8 @@ const fetchAccessToken = async () => {
 module.exports = () => {
   return async (ctx, next) => {
     const cacheAccessToken = await redis.get(keys.ACCESS_TOKEN);
+
+    console.log('redis access_token', cacheAccessToken);
 
     if (cacheAccessToken) {
       console.log('获取缓存 access_token', cacheAccessToken)
