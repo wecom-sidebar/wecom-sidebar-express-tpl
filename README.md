@@ -1,4 +1,4 @@
-# wecom-sidebar-sls
+# wecom-sidebar-express-tpl
 
 企业微信服务端API的服务器。
 
