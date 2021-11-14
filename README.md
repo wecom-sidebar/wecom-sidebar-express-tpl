@@ -42,3 +42,8 @@ docker-compose -f docker-compose.yml up -d
 ```bash
 npm run dev
 ```
+
+## 更多
+
+* 侧边栏的前端开发模板（React）可以看 [wecom-sidebar-react-tpl](https://github.com/wecom-sidebar/wecom-sidebar-react-tpl)
+* 侧边栏的微前端开发模式（Qiankun）可以看 [weccom-sidebar-qiankun-tpl](https://github.com/wecom-sidebar/wecom-sidebar-qiankun-tpl)
